@@ -17,6 +17,8 @@ public class QuestionAgent extends Agent {
     @Override
     protected void setup() {
         
+        System.out.println("Question " + getLocalName()+ " is ready!");
+        
         try {
             Thread.sleep(1000);
         } catch (InterruptedException ex) {
@@ -28,7 +30,7 @@ public class QuestionAgent extends Agent {
         if (args != null && args.length == 3) {
             
             String theme = args[0].toString();
-            String text = args[1].toString();
+            String text = args[1].toString();       
             
             try {
                 int complexity = Integer.parseInt(args[2].toString());

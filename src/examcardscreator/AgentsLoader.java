@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,7 +22,9 @@ public class AgentsLoader extends Agent {
             while ((currentLine = reader.readLine()) != null) {
                 lineCount++;
                 AgentController ac = parseAgent(currentLine);
-                ac.start();
+                if (ac != null) {
+                    ac.start();
+                }
             }
         } catch (IOException ex) {
             System.out.println("Reading error in line " + lineCount);
@@ -44,9 +47,9 @@ public class AgentsLoader extends Agent {
                 String agentName = splitted[1];
                 
                 String theme = splitted[2];
-                String text = splitted[3];
+                String text = splitted[3];               
                 int complexity = Integer.parseInt(splitted[4]);
-                
+
                 Object[] args = new Object[] {theme, text, complexity};
                 
                 return getContainerController().createNewAgent(agentName, "examcardscreator.QuestionAgent", args);
