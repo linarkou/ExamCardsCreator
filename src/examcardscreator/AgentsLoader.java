@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 public class AgentsLoader extends Agent {
     @Override
     protected void setup() {
+        // QuestionAgent creation
         BufferedReader reader = null;
         int lineCount = 0;
         try {
@@ -35,6 +36,21 @@ public class AgentsLoader extends Agent {
                 reader.close();
             } catch (IOException ex) {
                 System.out.println("Can't close the file");
+            }
+        }
+        
+        //ExamCardAgent creation
+        int countOfExamCardAgents = 5;
+        for (int i = 0; i < countOfExamCardAgents; ++i)
+        {
+            try
+            {
+                AgentController ac = getContainerController().createNewAgent("b"+i, "examcardscreator.ExamCardAgentAgent", null);
+                ac.start();
+                
+            } catch (StaleProxyException ex)
+            {
+                Logger.getLogger(AgentsLoader.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
