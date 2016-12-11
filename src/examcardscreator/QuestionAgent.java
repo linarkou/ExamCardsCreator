@@ -10,58 +10,53 @@ import jade.lang.acl.ACLMessage;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class QuestionAgent extends Agent
-{
+public class QuestionAgent extends Agent {
+    
     Question q;
 
     @Override
-    protected void setup()
-    {
-        try
-        {
+    protected void setup() {
+        
+        try {
             Thread.sleep(1000);
-        } catch (InterruptedException ex)
-        {
+        } catch (InterruptedException ex) {
             Logger.getLogger(QuestionAgent.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
         Object[] args = getArguments();
 
-        if (args != null && args.length == 3)
-        {
+        if (args != null && args.length == 3) {
+            
             String theme = args[0].toString();
             String text = args[1].toString();
-            try
-            {
+            
+            try {
                 int complexity = Integer.parseInt(args[2].toString());
                 q = new Question(theme, text, complexity);
-            } catch (NumberFormatException ex)
-            {
-                ex.printStackTrace();
+            } catch (NumberFormatException ex) {
                 this.takeDown();
             }
-        } else
-        /*удаляем агента если не заданы параметры*/
-        {
-            this.takeDown();
+        } 
+        else {
+            /* Удаляем агента если не заданы параметры */
+            this.takeDown();         
             return;
         }
-        /* Регистрируем агента в системе */
+        
+        /* Регистрируем агента в системе */      
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
         sd.setType("question");
         sd.setName("MyQuestion");
         dfd.addServices(sd);
-        try
-        {
+        try {
             DFService.register(this, dfd);
-        } catch (FIPAException fe)
-        {
+        } catch (FIPAException fe) {
             fe.printStackTrace();
         }
 
-        addBehaviour(new CyclicBehaviour()
-        {
+        addBehaviour(new CyclicBehaviour() {
             boolean isBusy = false;
 
             @Override
@@ -86,17 +81,14 @@ public class QuestionAgent extends Agent
                         reply.setPerformative(ACLMessage.AGREE);
                         myAgent.send(reply);
                         System.out.println("Вопрос " + myAgent.getName() + " выбран билетом " + msg.getSender().getName());
-                        /*убираем вопрос из списка сервисов*/
-                        try
-                        {
+                        /* Убираем вопрос из списка сервисов */
+                        try {
                             DFService.deregister(this.myAgent);
-                        } catch (FIPAException fe)
-                        {
+                        } catch (FIPAException fe) {
                             fe.printStackTrace();
                         }
                     }
-                } else
-                {
+                } else {
                     block();
                 }
             }
@@ -107,14 +99,10 @@ public class QuestionAgent extends Agent
     public void takeDown()
     {
         // Deregister from the yellow pages
-        try
-        {
+        try {
             DFService.deregister(this);
-        } catch (FIPAException fe)
-        {
+        } catch (FIPAException fe) {
             fe.printStackTrace();
         }
-        // Printout a dismissal message
-        System.out.println("Seller - agent " + getAID().getName() + " terminating.");
     }
 }
