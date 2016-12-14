@@ -367,6 +367,7 @@ public class ExamCardAgent extends Agent
                                 reply.setPerformative(ACLMessage.PROPOSE);
                                 reply.setContent(firstQuestion.toString() + ":" + secondQuestion.toString());
                                 myAgent.send(reply);
+                                System.out.println(myAgent.getLocalName() + " отправил свои вопросы " + msg.getSender().getLocalName());
                             }
                             else
                             {
@@ -380,6 +381,8 @@ public class ExamCardAgent extends Agent
                                     reply.setContent(split[2] + ":" + split[3]);
                                     reply.setPerformative(ACLMessage.AGREE);
                                     myAgent.send(reply);
+                                    System.out.println(myAgent.getLocalName() + " согласен меняться с " + msg.getSender().getLocalName());
+
                                 }
                                 else if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL && isChanged)
                                 {
@@ -387,6 +390,8 @@ public class ExamCardAgent extends Agent
                                     reply.setPerformative(ACLMessage.REFUSE);
                                     reply.setContent("У моих вопросов уже нормальная сложность"); 
                                     myAgent.send(reply);
+                                    System.out.println(myAgent.getLocalName() + " НЕ согласен меняться с " + msg.getSender().getLocalName());
+
                                 }
                             }
                         }
@@ -403,6 +408,7 @@ public class ExamCardAgent extends Agent
                         msg = myAgent.receive(mt);
                         if (msg != null)
                         {
+                            System.out.println(myAgent.getLocalName() + " получил вопросы от " + msg.getSender().getLocalName());
                             String[] split = msg.getContent().split(":");
                             if (split.length != 2)
                             {
@@ -420,6 +426,8 @@ public class ExamCardAgent extends Agent
                                 reply.setContent(qs[0].toString() + ":" + qs[2].toString() + ":" + qs[1].toString() + ":" + qs[3].toString()); 
                                 myAgent.send(reply);
                                 step = 4;
+                                System.out.println(myAgent.getLocalName() + " предложил поменяться " + msg.getSender().getLocalName());
+
                             } 
                             else
                             {
@@ -430,9 +438,11 @@ public class ExamCardAgent extends Agent
                                     reply.setContent(qs[1].toString() + ":" + qs[2].toString() + ":" + qs[0].toString() + ":" + qs[3].toString());
                                     myAgent.send(reply);
                                     step = 4;
+                                    System.out.println(myAgent.getLocalName() + " предложил поменяться " + msg.getSender().getLocalName());
                                 }
                                 else
                                 {
+                                    System.out.println("У " + myAgent.getLocalName() + " нет хороших вариантов обмена с " + msg.getSender().getLocalName());
                                     countOfNotAnsweredSimples--;
                                     if (countOfNotAnsweredSimples <= 0) //если нам ответили все simple-билеты
                                         step = 5;
@@ -457,10 +467,12 @@ public class ExamCardAgent extends Agent
                                 firstQuestion = new Question(split[0]);
                                 secondQuestion = new Question(split[1]);
                                 isChanged = true;
+                                System.out.println(myAgent.getLocalName() + " поменялся с " + msg.getSender().getLocalName());
                                 step = 5;
                             }
                             if (msg.getPerformative() == ACLMessage.REFUSE)
                             {
+                                System.out.println(myAgent.getLocalName() + " отказал в обмене " + msg.getSender().getLocalName());
                                 step = 3; //при отказе в обмене вопросами снова ждем предложения о вопросах
                                 if (countOfNotAnsweredSimples <= 0) //если нам ответили все simple-билеты
                                     step = 5;
