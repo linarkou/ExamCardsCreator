@@ -75,19 +75,28 @@ public class QuestionAgent extends Agent {
                         reply.setPerformative(ACLMessage.PROPOSE);
                         myAgent.send(reply);
                     }
-                    if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL && !isBusy)
+                    else
                     {
-                        isBusy = true;
-                        ACLMessage reply = msg.createReply();
-                        reply.setContent(q.toString());
-                        reply.setPerformative(ACLMessage.AGREE);
-                        myAgent.send(reply);
-                        System.out.println("Вопрос " + myAgent.getName() + " выбран билетом " + msg.getSender().getName());
-                        /* Убираем вопрос из списка сервисов */
-                        try {
-                            DFService.deregister(this.myAgent);
-                        } catch (FIPAException fe) {
-                            fe.printStackTrace();
+                        if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL && !isBusy)
+                        {
+                            isBusy = true;
+                            ACLMessage reply = msg.createReply();
+                            reply.setContent(q.toString());
+                            reply.setPerformative(ACLMessage.AGREE);
+                            myAgent.send(reply);
+                            //System.err.println("Вопрос " + myAgent.getLocalName() + "(" + q.toString() + ")" + " выбран билетом " + msg.getSender().getLocalName());
+                            /* Убираем вопрос из списка сервисов */
+                            //myAgent.doDelete();
+                        }
+                        else
+                        {
+                            if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL && isBusy)
+                            {
+                                ACLMessage reply = msg.createReply();
+                                reply.setContent(q.toString());
+                                reply.setPerformative(ACLMessage.REFUSE);
+                                myAgent.send(reply);
+                            }
                         }
                     }
                 } else {

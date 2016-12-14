@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collections;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,7 +16,7 @@ public class AgentsLoader extends Agent {
     @Override
     protected void setup() {
         // QuestionAgent creation
-        BufferedReader reader = null;
+        /*BufferedReader reader = null;
         int lineCount = 0;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream("agents.txt"), "utf-8")); // или cp1251
@@ -37,15 +38,30 @@ public class AgentsLoader extends Agent {
             } catch (IOException ex) {
                 System.out.println("Can't close the file");
             }
+        }*/
+        Random rand = new Random();
+        int n = 10;
+        for (int i = 0; i < n; ++i)
+        {
+            try
+            {
+                String currentLine = "q;" + i +";" + (i/(n/2)) + ";FGhgdhdfg;" + (rand.nextInt(5)+1);
+                AgentController ac = parseAgent(currentLine);
+                if (ac != null) {
+                    ac.start();
+                }
+            } catch (StaleProxyException ex)
+            {
+                Logger.getLogger(AgentsLoader.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
-        
         //ExamCardAgent creation
         int countOfExamCardAgents = 5;
         for (int i = 0; i < countOfExamCardAgents; ++i)
         {
             try
             {
-                AgentController ac = getContainerController().createNewAgent("b"+i, "examcardscreator.ExamCardAgentAgent", null);
+                AgentController ac = getContainerController().createNewAgent("b"+i, "examcardscreator.ExamCardAgent", null);
                 ac.start();
                 
             } catch (StaleProxyException ex)
@@ -53,6 +69,16 @@ public class AgentsLoader extends Agent {
                 Logger.getLogger(AgentsLoader.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        
+        //Manager creation
+        try
+        {
+            AgentController ac = getContainerController().createNewAgent("m1", "examcardscreator.Manager", null);
+            ac.start();
+        } catch (StaleProxyException ex)
+        {
+            Logger.getLogger(AgentsLoader.class.getName()).log(Level.SEVERE, null, ex);
+        }        
     }
     
     private AgentController parseAgent(String s) throws StaleProxyException {
@@ -60,7 +86,7 @@ public class AgentsLoader extends Agent {
         
         switch (splitted[0]) {
             case "q":               
-                String agentName = splitted[1];
+                String agentName = splitted[0] + splitted[1];
                 
                 String theme = splitted[2];
                 String text = splitted[3];               

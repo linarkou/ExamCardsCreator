@@ -13,15 +13,17 @@ public class Question
         this.complexity = complexity;
     }
     
+    public Question(String str)
+    {
+        String[] elems = str.split(";");
+        this.theme = elems[0];
+        this.text = elems[1];
+        this.complexity = Integer.parseInt(elems[2]);
+    }
+    
     @Override
     public String toString()
     {
         return theme + ";" + text + ";" + complexity;
-    }
-    
-    public static Question parse(String str)
-    {
-        String[] elems = str.split(";");
-        return new Question(elems[0], elems[1], Integer.parseInt(elems[2]));
     }
 }

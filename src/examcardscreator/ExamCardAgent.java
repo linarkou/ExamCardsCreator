@@ -245,7 +245,7 @@ public class ExamCardAgent extends Agent
 
     private class Exchanger extends TickerBehaviour
     {
-        int step = 0;
+        int step;
         boolean isInitiator = false;
         MessageTemplate mt;
         ACLMessage msg;
@@ -256,6 +256,7 @@ public class ExamCardAgent extends Agent
         public Exchanger(Agent a, long period)
         {
             super(a, period);
+            step = 0;
         }
 
         @Override
@@ -407,7 +408,7 @@ public class ExamCardAgent extends Agent
                             {
                                 int k =0;
                                 k++;
-                                System.out.println(msg.getSender().getLocalName());
+                                System.err.println(msg.getSender().getLocalName());
                             }
                             Question q1 = new Question(split[0]);
                             Question q2 = new Question(split[1]);
