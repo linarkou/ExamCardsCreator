@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 public class QuestionAgent extends Agent {
     
     Question q;
+    boolean isBusy = false;
 
     @Override
     protected void setup() {
@@ -59,7 +60,6 @@ public class QuestionAgent extends Agent {
         }
 
         addBehaviour(new CyclicBehaviour() {
-            boolean isBusy = false;
 
             @Override
             public void action()
@@ -74,6 +74,7 @@ public class QuestionAgent extends Agent {
                         reply.setContent(q.toString());
                         reply.setPerformative(ACLMessage.PROPOSE);
                         myAgent.send(reply);
+                        System.out.println(myAgent.getLocalName() + " ответил на запрос");
                     }
                     else
                     {
@@ -84,9 +85,14 @@ public class QuestionAgent extends Agent {
                             reply.setContent(q.toString());
                             reply.setPerformative(ACLMessage.AGREE);
                             myAgent.send(reply);
-                            //System.err.println("Вопрос " + myAgent.getLocalName() + "(" + q.toString() + ")" + " выбран билетом " + msg.getSender().getLocalName());
+                            System.out.println("Вопрос " + myAgent.getLocalName() + "(" + q.toString() + ")" + " выбран билетом " + msg.getSender().getLocalName());
                             /* Убираем вопрос из списка сервисов */
                             //myAgent.doDelete();
+                            try {
+                                DFService.deregister(this.myAgent);
+                            } catch (FIPAException fe) {
+                                fe.printStackTrace();
+                            }
                         }
                         else
                         {
@@ -99,6 +105,23 @@ public class QuestionAgent extends Agent {
                             }
                         }
                     }
+                    if (msg.getPerformative() == ACLMessage.CANCEL)
+                        {
+                            isBusy = false;
+                            System.err.println("CANCEL");
+                            DFAgentDescription dfd = new DFAgentDescription();
+                            dfd.setName(getAID());
+                            ServiceDescription sd = new ServiceDescription();
+                            sd.setType("question");
+                            sd.setName("MyQuestion");
+                            dfd.addServices(sd);
+                            try {
+                                DFService.register(this.myAgent, dfd);
+                            } catch (FIPAException fe) {
+                                fe.printStackTrace();
+                            }
+                            return;
+                        }
                 } else {
                     block();
                 }
