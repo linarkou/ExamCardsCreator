@@ -17,7 +17,6 @@ public class ExamCardAgentsLoader extends Agent {
     @Override
     protected void setup() {
         int countOfExamCardAgents = 0;
-        int lineCount = 0;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("cards.txt"), "utf-8"))) {  // или cp1251
             String currentLine;
             if ((currentLine = reader.readLine()) != null) 
@@ -32,7 +31,7 @@ public class ExamCardAgentsLoader extends Agent {
             Logger.getLogger(ExamCardAgentsLoader.class.getName()).log(Level.SEVERE, null, ex);
         }
         //ExamCardAgent creation
-        int rand = (new Random()).nextInt();
+        int rand = (new Random()).nextInt()%1000000;
         
         for (int i = 1; i <= countOfExamCardAgents; ++i)
         {
@@ -55,25 +54,5 @@ public class ExamCardAgentsLoader extends Agent {
         {
             Logger.getLogger(ExamCardAgentsLoader.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-    
-    private AgentController parseAgent(String s) throws StaleProxyException {
-        String[] splitted = s.split(";");
-        
-        switch (splitted[0]) {
-            case "q":               
-                String agentName = splitted[0] + splitted[1];
-                
-                String theme = splitted[2];
-                String text = splitted[3];               
-                int complexity = Integer.parseInt(splitted[4]);
-
-                Object[] args = new Object[] {theme, text, complexity};
-                
-                return getContainerController().createNewAgent(agentName, "examcardscreator.QuestionAgent", args);
-                
-            default:
-                return null;
-        }        
     }
 }

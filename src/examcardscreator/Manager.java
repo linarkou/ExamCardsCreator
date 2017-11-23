@@ -10,6 +10,7 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -53,6 +54,7 @@ public class Manager extends Agent
         @Override
         protected void onTick()
         {
+            ArrayList<DFAgentDescription> result = new ArrayList<>();
             switch (step)
             {
                 case 0:
@@ -64,8 +66,8 @@ public class Manager extends Agent
                     template.addServices(sd);
                     try
                     {
-                        DFAgentDescription[] result = DFService.search(myAgent, template);
-                        countOfCards = result.length;
+                        DFAgentDescription[] res = DFService.search(myAgent, template);
+                        countOfCards = res.length;
                     } catch (FIPAException ex)
                     {
                         ex.printStackTrace();
@@ -138,10 +140,10 @@ public class Manager extends Agent
                     sd = new ServiceDescription();
                     sd.setType("initiator");
                     template.addServices(sd);
+                    
                     try
                     {
-                        DFAgentDescription[] result = DFService.search(myAgent, template);
-                        countOfCards = result.length;
+                        result = new ArrayList<>(Arrays.asList(DFService.search(myAgent, template)));
                     } catch (FIPAException ex)
                     {
                         ex.printStackTrace();
@@ -152,8 +154,8 @@ public class Manager extends Agent
                     msg = myAgent.receive(mt);
                     if (msg != null)
                     {
-                        countOfCards--;
-                        if (countOfCards <= 0) //если все билеты закончили обмен
+                        result.remove(msg.getSender());
+                        if (result.size() <= 0) //если все билеты закончили обмен
                         {
                             System.out.println();
                             System.out.println("БИЛЕТЫ ЗАКОНЧИЛИ ОБМЕН И ГОТОВЫ!");
@@ -175,8 +177,8 @@ public class Manager extends Agent
                     template.addServices(sd);
                     try
                     {
-                        DFAgentDescription[] result = DFService.search(myAgent, template);
-                        for(DFAgentDescription s : result)
+                        DFAgentDescription[] res = DFService.search(myAgent, template);
+                        for(DFAgentDescription s : res)
                             cards.add(s.getName());
                     } catch (FIPAException ex)
                     {
@@ -188,8 +190,8 @@ public class Manager extends Agent
                     template.addServices(sd);
                     try
                     {
-                        DFAgentDescription[] result = DFService.search(myAgent, template);
-                        for(DFAgentDescription s : result)
+                        DFAgentDescription[] res = DFService.search(myAgent, template);
+                        for(DFAgentDescription s : res)
                             cards.add(s.getName());
                     } catch (FIPAException ex)
                     {
@@ -203,6 +205,17 @@ public class Manager extends Agent
                     message.setLanguage("1");
                     myAgent.send(message);
                     step = 6;
+                    break;
+                case 6:
+                    mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM_REF);
+                    msg = myAgent.receive(mt);
+                    if (msg != null) {
+                        ACLMessage reply = msg.createReply();
+                        reply.setPerformative(ACLMessage.PROPAGATE);
+                        reply.setLanguage("1");
+                        reply.setContent("Покажи результат");
+                        myAgent.send(reply);
+                    }
                     break;
             }
         }

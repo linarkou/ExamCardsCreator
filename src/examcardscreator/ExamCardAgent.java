@@ -17,13 +17,13 @@ import java.util.*;
 
 public class ExamCardAgent extends Agent
 {
-    
     private Question firstQuestion;
     private Question secondQuestion;
     public double average = 0;
     boolean isChanged = false;
     
     HashSet<AID> simpleCards;
+    boolean isPrinted = false;
     
     protected void setup()
     {
@@ -363,8 +363,8 @@ public class ExamCardAgent extends Agent
         @Override
         protected void onTick()
         {
-            if (isChanged)
-                return;
+            //if (isChanged)
+                //return;
             switch (step)
             {
                 case 0:
@@ -411,6 +411,10 @@ public class ExamCardAgent extends Agent
         @Override
         public void action()
         {
+            if (isPrinted)
+                return;
+            if (simpleCards.size() <= 0 &&!isPrinted) 
+                step=3;
             switch (step)
             {
                 case 1:
@@ -460,16 +464,6 @@ public class ExamCardAgent extends Agent
                                 step = 3;
                             }
                         }
-                            
-                        /*else
-                        {
-                            System.out.println("У " + myAgent.getLocalName() + " нет хороших вариантов обмена с " + msg.getSender().getLocalName());
-                            simpleCards.remove(msg.getSender());
-                            if (simpleCards.size() <= 0) //если нам ответили все simple-билеты
-                            {
-                                step = 3;
-                            }
-                        }*/
                     
                     } else
                     {
@@ -536,10 +530,11 @@ public class ExamCardAgent extends Agent
                 case 4:
                     mt = MessageTemplate.and(MessageTemplate.MatchLanguage("1"), MessageTemplate.MatchPerformative(ACLMessage.PROPAGATE));
                     msg = myAgent.receive(mt);
-                    if (msg != null) 
+                    if (msg != null && !isPrinted) 
                     {
                         int sum = firstQuestion.complexity + secondQuestion.complexity;
                         System.out.println("Билет " + myAgent.getLocalName() + " готов: " + ((ExamCardAgent)myAgent).firstQuestion.toString() + ", " + ((ExamCardAgent)myAgent).secondQuestion.toString() + " Сложность=" + sum);
+                        isPrinted = true;
                         step = 5;
                     }
                     break;
@@ -584,6 +579,7 @@ public class ExamCardAgent extends Agent
             msg = myAgent.receive(MessageTemplate.MatchLanguage("1"));
             if (msg != null)
             {
+                
                 if (msg.getPerformative() == ACLMessage.REQUEST)
                 {
                     ACLMessage reply = msg.createReply();

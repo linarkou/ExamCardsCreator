@@ -16,7 +16,6 @@ public class Question
     public Question(String str)
     {
         String[] elems = str.split(";");
-        int tmp = Integer.parseInt(elems[0].trim());
         this.theme = elems[0].trim();
         this.text = elems[1].trim();
         this.complexity = Integer.parseInt(elems[2].trim());

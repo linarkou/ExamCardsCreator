@@ -1,0 +1,1 @@
+java -cp %~dp0lib\jade.jar;%~dp0build\classes jade.Boot -container -host localhost -port 1099 -agents QuestionLoader:examcardscreator.QuestionAgentsLoader 

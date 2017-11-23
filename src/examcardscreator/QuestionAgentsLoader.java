@@ -18,11 +18,12 @@ public class QuestionAgentsLoader extends Agent {
     protected void setup() {
         // QuestionAgent creation
         int lineCount = 0;
+        int rand = (new Random()).nextInt()%1000000;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("questions.txt"), "utf-8"))){
             String currentLine;
             while ((currentLine = reader.readLine()) != null) {
                 lineCount++;
-                AgentController ac = parseAgent(currentLine);
+                AgentController ac = parseAgent(currentLine, rand+lineCount);
                 if (ac != null) {
                     ac.start();
                 }
@@ -34,23 +35,12 @@ public class QuestionAgentsLoader extends Agent {
         }
     }
     
-    private AgentController parseAgent(String s) throws StaleProxyException {
+    private AgentController parseAgent(String s, int number) throws StaleProxyException {
         String[] splitted = s.split(";");
-        
-        switch (splitted[0]) {
-            case "q":               
-                String agentName = splitted[0] + splitted[1];
-                
-                String theme = splitted[2];
-                String text = splitted[3];               
-                int complexity = Integer.parseInt(splitted[4]);
-
-                Object[] args = new Object[] {theme, text, complexity};
-                
-                return getContainerController().createNewAgent(agentName, "examcardscreator.QuestionAgent", args);
-                
-            default:
-                return null;
-        }        
+        String theme = splitted[0];
+        String text = splitted[1];               
+        int complexity = Integer.parseInt(splitted[2]);
+        Object[] args = new Object[] {theme, text, complexity};
+        return getContainerController().createNewAgent("q"+number, "examcardscreator.QuestionAgent", args);
     }
 }
