@@ -56,6 +56,8 @@ public class Manager extends Agent
             switch (step)
             {
                 case 0:
+                    countOfCards = 0;
+                    readyCards = 0;
                     DFAgentDescription template = new DFAgentDescription();
                     ServiceDescription sd = new ServiceDescription();
                     sd.setType("card");
@@ -79,7 +81,7 @@ public class Manager extends Agent
                         if (cardAgents.size() == countOfCards && cardAgents.size() != 0) //если количество всех агентов-билетов с количеством "готовых" агентов-билетов
                         {
                             step = 1;
-                            System.err.println("Все билеты собрали вопросы");
+                            System.err.println("Все билеты собрали вопросы и сообщили Менеджеру об этом");
                         }
                     } else
                     {
@@ -94,6 +96,7 @@ public class Manager extends Agent
                         summary += c;
                     }
                     double average = summary / (countOfCards*1.0);
+                    System.out.println("average = " + average);
                     ACLMessage message = new ACLMessage(ACLMessage.INFORM);
                     for (AID aid : cardAgents.keySet())
                     {
@@ -145,7 +148,7 @@ public class Manager extends Agent
                     }
                     step = 4;
                 case 4:
-                    mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+                    mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM_REF);
                     msg = myAgent.receive(mt);
                     if (msg != null)
                     {
@@ -153,7 +156,7 @@ public class Manager extends Agent
                         if (countOfCards <= 0) //если все билеты закончили обмен
                         {
                             System.out.println();
-                            System.out.println("ВСЕ БИЛЕТЫ ЗАКОНЧИЛИ ОБМЕН И ГОТОВЫ!");
+                            System.out.println("БИЛЕТЫ ЗАКОНЧИЛИ ОБМЕН И ГОТОВЫ!");
                             System.out.println();
                             
                             step = 5;
@@ -162,6 +165,45 @@ public class Manager extends Agent
                     {
                         block();
                     }
+                    break;
+                case 5:
+                    message = new ACLMessage(ACLMessage.PROPAGATE);
+                    HashSet<AID> cards = new HashSet<>();
+                    template = new DFAgentDescription();
+                    sd = new ServiceDescription();
+                    sd.setType("initiator");
+                    template.addServices(sd);
+                    try
+                    {
+                        DFAgentDescription[] result = DFService.search(myAgent, template);
+                        for(DFAgentDescription s : result)
+                            cards.add(s.getName());
+                    } catch (FIPAException ex)
+                    {
+                        ex.printStackTrace();
+                    }
+                    template = new DFAgentDescription();
+                    sd = new ServiceDescription();
+                    sd.setType("simple");
+                    template.addServices(sd);
+                    try
+                    {
+                        DFAgentDescription[] result = DFService.search(myAgent, template);
+                        for(DFAgentDescription s : result)
+                            cards.add(s.getName());
+                    } catch (FIPAException ex)
+                    {
+                        ex.printStackTrace();
+                    }
+                    for (AID aid : cards)
+                    {
+                        message.addReceiver(aid);
+                    }
+                    message.setContent("Покажи результат");
+                    message.setLanguage("1");
+                    myAgent.send(message);
+                    step = 6;
+                    break;
             }
         }
 
