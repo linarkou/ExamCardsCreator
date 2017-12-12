@@ -11,12 +11,15 @@ import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.*;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+
+import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.*;
 
 public class ExamCardAgent extends Agent
 {
+    static String filename = "output.txt";
     private Question firstQuestion;
     private Question secondQuestion;
     public double average = 0;
@@ -612,8 +615,25 @@ public class ExamCardAgent extends Agent
                 }
                 if (msg.getPerformative() == ACLMessage.PROPAGATE)
                 {
+
                     int sum = firstQuestion.complexity + secondQuestion.complexity;
                     System.out.println("Билет " + myAgent.getLocalName() + " готов: " + ((ExamCardAgent)myAgent).firstQuestion.toString() + ", " + ((ExamCardAgent)myAgent).secondQuestion.toString() + " Сложность=" + sum);
+                    try {
+                        Thread.sleep(new Random().nextInt(3000));
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        PrintWriter writer = new PrintWriter(filename, "UTF-8");
+                        writer.println("Билет " + myAgent.getLocalName() + " готов: " + ((ExamCardAgent)myAgent).firstQuestion.toString() + ", " + ((ExamCardAgent)myAgent).secondQuestion.toString() + " Сложность=" + sum);
+                        writer.close();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    } finally {
+                    }
+
                 }
             } else
             {
