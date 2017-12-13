@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 public class Manager extends Agent
 {
+    static String filename = "output"+System.currentTimeMillis()+".txt";
 
     @Override
     protected void setup()
@@ -172,28 +173,12 @@ public class Manager extends Agent
                     msg = myAgent.receive(mt);
                     if (msg != null)
                     {
-                        if (result.remove(msg.getSender())) {
-                            outputReadyAgents.add(msg.getContent());
-                        }
+                        result.remove(msg.getSender());
                         if (result.size() <= 0) //если все билеты закончили обмен
                         {
                             System.out.println();
                             System.out.println("БИЛЕТЫ ЗАКОНЧИЛИ ОБМЕН И ГОТОВЫ!");
                             System.out.println();
-
-                            try (FileWriter fw = new FileWriter("output.txt", true);
-                                 BufferedWriter bw = new BufferedWriter(fw);
-                                 PrintWriter out = new PrintWriter(bw))
-                            {
-                                for (String s : outputReadyAgents)
-                                    out.println(s);
-                                out.close();
-                            } catch (FileNotFoundException e) {
-                                e.printStackTrace();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-
                             step = 5;
                         }
                     } else
@@ -243,23 +228,16 @@ public class Manager extends Agent
                     mt = MessageTemplate.MatchPerformative(ACLMessage.PROXY);
                     msg = myAgent.receive(mt);
                     if (msg != null) {
-                        if (resultSimple.remove(msg.getSender())) {
-                            outputReadyAgentsSimple.add(msg.getContent());
-                        }
-                        if (resultSimple.size() <= 0) //если все билеты закончили обмен
+                        try (FileWriter fw = new FileWriter(filename, true);
+                             BufferedWriter bw = new BufferedWriter(fw);
+                             PrintWriter out = new PrintWriter(bw))
                         {
-                            try (FileWriter fw = new FileWriter("output.txt", true);
-                                 BufferedWriter bw = new BufferedWriter(fw);
-                                 PrintWriter out = new PrintWriter(bw))
-                            {
-                                for (String s : outputReadyAgentsSimple)
-                                    out.println(s);
-                                out.close();
-                            } catch (FileNotFoundException e) {
-                                e.printStackTrace();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                            out.println(msg.getContent());
+                            out.close();
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
                     }
                     break;

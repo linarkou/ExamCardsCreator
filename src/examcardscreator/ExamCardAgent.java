@@ -421,8 +421,8 @@ public class ExamCardAgent extends Agent
             switch (step)
             {
                 case 1:
-                    if (!isChanged)
-                    {
+                    //if (!isChanged)
+                    //{
                     mt = MessageTemplate.and(mtl,MessageTemplate.MatchPerformative(ACLMessage.PROPOSE));
                     msg = myAgent.receive(mt);
                     if (msg != null)
@@ -472,7 +472,7 @@ public class ExamCardAgent extends Agent
                     {
                         block();
                     }
-                    }
+                    //}
                     break;
                 case 2:
                     mt = MessageTemplate.and(mtl,MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.REFUSE), MessageTemplate.MatchPerformative(ACLMessage.AGREE)));
@@ -491,6 +491,7 @@ public class ExamCardAgent extends Agent
                         if (msg.getPerformative() == ACLMessage.REFUSE)
                         {
                             System.out.println(myAgent.getLocalName() + " отказал в обмене " + msg.getSender().getLocalName());
+                            simpleCards.remove(msg.getSender());
                             //step = 1; //при отказе в обмене вопросами снова ждем предложения о вопросах
                         }
                         step = 1;
@@ -524,7 +525,8 @@ public class ExamCardAgent extends Agent
                     }
                     ACLMessage message = new ACLMessage(ACLMessage.INFORM_REF);
                     message.addReceiver(manager);
-                    message.setContent("Обмен закончен");
+                    int sum = firstQuestion.complexity + secondQuestion.complexity;
+                    message.setContent("Билет " + myAgent.getLocalName() + " готов: " + ((ExamCardAgent)myAgent).firstQuestion.toString() + ", " + ((ExamCardAgent)myAgent).secondQuestion.toString() + " Сложность=" + sum);
                     message.setReplyWith("ready" + System.currentTimeMillis());
                     myAgent.send(message);
                     //block();
@@ -535,8 +537,13 @@ public class ExamCardAgent extends Agent
                     msg = myAgent.receive(mt);
                     if (msg != null && !isPrinted) 
                     {
-                        int sum = firstQuestion.complexity + secondQuestion.complexity;
+                        sum = firstQuestion.complexity + secondQuestion.complexity;
                         System.out.println("Билет " + myAgent.getLocalName() + " готов: " + ((ExamCardAgent)myAgent).firstQuestion.toString() + ", " + ((ExamCardAgent)myAgent).secondQuestion.toString() + " Сложность=" + sum);
+                        ACLMessage reply = msg.createReply();
+                        reply.setPerformative(ACLMessage.PROXY);
+                        reply.setContent("Билет " + myAgent.getLocalName() + " готов: " + ((ExamCardAgent)myAgent).firstQuestion.toString() + ", " + ((ExamCardAgent)myAgent).secondQuestion.toString() + " Сложность=" + sum);
+                        reply.setReplyWith("ready" + System.currentTimeMillis());
+                        myAgent.send(reply);
                         isPrinted = true;
                         step = 5;
                     }
@@ -617,31 +624,11 @@ public class ExamCardAgent extends Agent
                 {
                     int sum = firstQuestion.complexity + secondQuestion.complexity;
                     System.out.println("Билет " + myAgent.getLocalName() + " готов: " + ((ExamCardAgent)myAgent).firstQuestion.toString() + ", " + ((ExamCardAgent)myAgent).secondQuestion.toString() + " Сложность=" + sum);
-
-                    AID manager = null;
-                    DFAgentDescription template = new DFAgentDescription();
-                    ServiceDescription sd = new ServiceDescription();
-                    sd.setType("manager");
-                    template.addServices(sd);
-                    try
-                    {
-                        DFAgentDescription[] result = DFService.search(myAgent, template);
-                        if (result.length != 0)
-                        {
-                            manager = result[0].getName();
-                        } else
-                        {
-                            return;
-                        }
-                    } catch (FIPAException fe)
-                    {
-                        fe.printStackTrace();
-                    }
-                    ACLMessage message = new ACLMessage(ACLMessage.PROXY);
-                    message.addReceiver(manager);
-                    message.setContent("Билет " + myAgent.getLocalName() + " готов: " + ((ExamCardAgent)myAgent).firstQuestion.toString() + ", " + ((ExamCardAgent)myAgent).secondQuestion.toString() + " Сложность=" + sum);
-                    message.setReplyWith("ready" + System.currentTimeMillis());
-                    myAgent.send(message);
+                    ACLMessage reply = msg.createReply();
+                    reply.setPerformative(ACLMessage.PROXY);
+                    reply.setContent("Билет " + myAgent.getLocalName() + " готов: " + ((ExamCardAgent)myAgent).firstQuestion.toString() + ", " + ((ExamCardAgent)myAgent).secondQuestion.toString() + " Сложность=" + sum);
+                    reply.setReplyWith("ready" + System.currentTimeMillis());
+                    myAgent.send(reply);
                     //block();
                 }
             } else
