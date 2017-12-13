@@ -9,6 +9,8 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -55,6 +57,9 @@ public class Manager extends Agent
         protected void onTick()
         {
             ArrayList<DFAgentDescription> result = new ArrayList<>();
+            ArrayList<String> outputReadyAgents  = new ArrayList<>();
+            ArrayList<DFAgentDescription> resultSimple = new ArrayList<>();
+            ArrayList<String> outputReadyAgentsSimple = new ArrayList<>();
             switch (step)
             {
                 case 0:
@@ -148,19 +153,47 @@ public class Manager extends Agent
                     {
                         ex.printStackTrace();
                     }
+
+                    template = new DFAgentDescription();
+                    sd = new ServiceDescription();
+                    sd.setType("simple");
+                    template.addServices(sd);
+
+                    try
+                    {
+                        resultSimple = new ArrayList<>(Arrays.asList(DFService.search(myAgent, template)));
+                    } catch (FIPAException ex)
+                    {
+                        ex.printStackTrace();
+                    }
                     step = 4;
                 case 4:
                     mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM_REF);
                     msg = myAgent.receive(mt);
                     if (msg != null)
                     {
-                        result.remove(msg.getSender());
+                        if (result.remove(msg.getSender())) {
+                            outputReadyAgents.add(msg.getContent());
+                        }
                         if (result.size() <= 0) //если все билеты закончили обмен
                         {
                             System.out.println();
                             System.out.println("БИЛЕТЫ ЗАКОНЧИЛИ ОБМЕН И ГОТОВЫ!");
                             System.out.println();
-                            
+
+                            try (FileWriter fw = new FileWriter("output.txt", true);
+                                 BufferedWriter bw = new BufferedWriter(fw);
+                                 PrintWriter out = new PrintWriter(bw))
+                            {
+                                for (String s : outputReadyAgents)
+                                    out.println(s);
+                                out.close();
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
                             step = 5;
                         }
                     } else
@@ -207,14 +240,27 @@ public class Manager extends Agent
                     step = 6;
                     break;
                 case 6:
-                    mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM_REF);
+                    mt = MessageTemplate.MatchPerformative(ACLMessage.PROXY);
                     msg = myAgent.receive(mt);
                     if (msg != null) {
-                        ACLMessage reply = msg.createReply();
-                        reply.setPerformative(ACLMessage.PROPAGATE);
-                        reply.setLanguage("1");
-                        reply.setContent("Покажи результат");
-                        myAgent.send(reply);
+                        if (resultSimple.remove(msg.getSender())) {
+                            outputReadyAgentsSimple.add(msg.getContent());
+                        }
+                        if (resultSimple.size() <= 0) //если все билеты закончили обмен
+                        {
+                            try (FileWriter fw = new FileWriter("output.txt", true);
+                                 BufferedWriter bw = new BufferedWriter(fw);
+                                 PrintWriter out = new PrintWriter(bw))
+                            {
+                                for (String s : outputReadyAgentsSimple)
+                                    out.println(s);
+                                out.close();
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
                     break;
             }

@@ -615,25 +615,34 @@ public class ExamCardAgent extends Agent
                 }
                 if (msg.getPerformative() == ACLMessage.PROPAGATE)
                 {
-
                     int sum = firstQuestion.complexity + secondQuestion.complexity;
                     System.out.println("Билет " + myAgent.getLocalName() + " готов: " + ((ExamCardAgent)myAgent).firstQuestion.toString() + ", " + ((ExamCardAgent)myAgent).secondQuestion.toString() + " Сложность=" + sum);
-                    try {
-                        Thread.sleep(new Random().nextInt(3000));
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        PrintWriter writer = new PrintWriter(filename, "UTF-8");
-                        writer.println("Билет " + myAgent.getLocalName() + " готов: " + ((ExamCardAgent)myAgent).firstQuestion.toString() + ", " + ((ExamCardAgent)myAgent).secondQuestion.toString() + " Сложность=" + sum);
-                        writer.close();
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    } finally {
-                    }
 
+                    AID manager = null;
+                    DFAgentDescription template = new DFAgentDescription();
+                    ServiceDescription sd = new ServiceDescription();
+                    sd.setType("manager");
+                    template.addServices(sd);
+                    try
+                    {
+                        DFAgentDescription[] result = DFService.search(myAgent, template);
+                        if (result.length != 0)
+                        {
+                            manager = result[0].getName();
+                        } else
+                        {
+                            return;
+                        }
+                    } catch (FIPAException fe)
+                    {
+                        fe.printStackTrace();
+                    }
+                    ACLMessage message = new ACLMessage(ACLMessage.PROXY);
+                    message.addReceiver(manager);
+                    message.setContent("Билет " + myAgent.getLocalName() + " готов: " + ((ExamCardAgent)myAgent).firstQuestion.toString() + ", " + ((ExamCardAgent)myAgent).secondQuestion.toString() + " Сложность=" + sum);
+                    message.setReplyWith("ready" + System.currentTimeMillis());
+                    myAgent.send(message);
+                    //block();
                 }
             } else
             {
