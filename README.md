@@ -1,13 +1,13 @@
 # ExamCardsCreator
-Мультиагентная система для построения списка билетов примерно равной сложности из списка вопросов.
+Multi-agent system for building a list of examination cards of approximately equal complexity.
 
-Список вопросов задается в файле questions.txt в формате: "<Тема>;<Текст вопроса>;<Сложность>".
+Tickets are generated on the server, clients provide lists of questions.
 
-Необходимое количество билетов задается в файле cards.txt.
+The list of questions has format "\<Topic\>;\<Question Text\>;\<Difficulty\>" and specified in the file "questions.txt" on each client.
 
-Билеты формируются на сервере, клиенты предоставляют списки вопросов.
+The required number of exam cards is set on the file "cards.txt" on server.
 
-Для запуска сервера использовать server.bat
-
-Для запуска клиента использовать client.bat, предварительно изменив в нем -host <IP> на IP-адрес сервера.
-
+I used <a href="http://jade.tilab.com">JADE Framework</a>.
+# How to run
+<a href="server.bat">Server</a><br>
+<a href="client.bat">Client</a> (-host section specifies server IP-address)
